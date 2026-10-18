@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;500;700;900&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/velom.css?v=9">
+<link rel="stylesheet" href="assets/css/velom.css?v=11">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -54,9 +54,11 @@
   <nav class="nav-links">
     <a href="#garage">Garasi</a>
     <a href="#market">Harga Pasaran</a>
+    <a href="#request">Request</a>
     <a href="#contact">Kontak</a>
   </nav>
   <div class="nav-right">
+    <a id="navIg" class="sound-btn" target="_blank" rel="noopener" aria-label="Instagram Velom Car" data-cursor="IG" hidden><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
     <button id="soundBtn" class="sound-btn" aria-label="Suara on/off" data-cursor="Suara">
       <span class="bars"><i></i><i></i><i></i><i></i></span>
     </button>
@@ -95,10 +97,9 @@
       </div>
       <div class="hero-captions">
         <div class="cap" data-i="0"><b>01</b><span>Seret mobil untuk memutar 360°</span></div>
-        <div class="cap" data-i="1"><b>02</b><span>Warna cat mengikuti unit di garasi</span></div>
+        <div class="cap" data-i="1"><b>02</b><span>Semua unit di bawah harga pasaran</span></div>
         <div class="cap" data-i="2"><b>03</b><span>Scroll = pedal gas. Rasakan mesinnya.</span></div>
       </div>
-      <div class="hero-paint"><span class="swatch"></span><span><small>Cat saat ini</small><b id="paintName">—</b></span></div>
       <div class="hero-stats">
         <div><b id="statUnits">0</b><small>Unit ready</small></div>
         <div><b id="statBrands">0</b><small>Brand</small></div>
@@ -155,6 +156,57 @@
     <div class="svc-grid" id="whyGrid"></div>
   </section>
 
+  <!-- ================= REQUEST ================= -->
+  <section id="request" class="request">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow"><i class="dot"></i>Request</p>
+        <h2 class="sec-title">Punya mobil?<br><em>Cari unit?</em></h2>
+      </div>
+      <p class="sec-note">Ketik kebutuhan Anda di bawah. Pesannya tersusun otomatis dan langsung terkirim ke WhatsApp Velom.</p>
+    </div>
+    <div class="rq">
+      <form class="rq-form" id="rqForm" novalidate>
+        <div class="rq-tabs" role="tablist">
+          <button type="button" class="rq-tab is-on" data-mode="jual" role="tab">🚗 Saya mau jual mobil</button>
+          <button type="button" class="rq-tab" data-mode="cari" role="tab">🔍 Saya cari unit</button>
+        </div>
+
+        <fieldset class="rq-set" data-mode="jual">
+          <label class="rq-f"><span>Nama Anda</span><input name="nama" autocomplete="name" placeholder="contoh: Budi"></label>
+          <label class="rq-f"><span>Kota</span><input name="kota" placeholder="contoh: Jakarta Selatan"></label>
+          <label class="rq-f full"><span>Merk &amp; tipe mobil Anda *</span><input name="unit" placeholder="contoh: BMW 530i M Sport"></label>
+          <label class="rq-f"><span>Tahun</span><input name="tahun" inputmode="numeric" placeholder="contoh: 2020"></label>
+          <label class="rq-f"><span>Odometer</span><input name="odo" placeholder="contoh: 35rb km"></label>
+          <label class="rq-f"><span>Warna</span><input name="warna" placeholder="contoh: Hitam"></label>
+          <label class="rq-f"><span>Harga yang diharapkan</span><input name="harga" placeholder="contoh: 650 jt nego"></label>
+          <label class="rq-f full"><span>Kondisi / catatan</span><textarea name="catatan" rows="3" placeholder="contoh: tangan pertama, service record, pajak panjang…"></textarea></label>
+        </fieldset>
+
+        <fieldset class="rq-set" data-mode="cari" hidden disabled>
+          <label class="rq-f"><span>Nama Anda</span><input name="nama" autocomplete="name" placeholder="contoh: Budi"></label>
+          <label class="rq-f"><span>Kota</span><input name="kota" placeholder="contoh: Surabaya"></label>
+          <label class="rq-f full"><span>Unit yang dicari *</span><input name="unit" placeholder="contoh: Mercedes-Benz E300 AMG / Alphard"></label>
+          <label class="rq-f"><span>Tahun</span><input name="tahun" placeholder="contoh: 2019 – 2022"></label>
+          <label class="rq-f"><span>Budget</span><input name="budget" placeholder="contoh: maks 900 jt"></label>
+          <label class="rq-f full"><span>Warna favorit</span><input name="warna" placeholder="contoh: Putih / Hitam"></label>
+          <label class="rq-f full"><span>Catatan</span><textarea name="catatan" rows="3" placeholder="contoh: low odo, interior coklat, butuh cepat…"></textarea></label>
+        </fieldset>
+
+        <button type="submit" class="btn btn-wa rq-send">
+          <svg viewBox="0 0 32 32" width="20" height="20"><path fill="currentColor" d="M16 3C9 3 3.3 8.6 3.3 15.6c0 2.5.7 4.8 2 6.8L3 29l6.8-2.2c1.9 1 4 1.6 6.2 1.6 7 0 12.7-5.7 12.7-12.7S23 3 16 3z"/></svg>
+          Kirim ke WhatsApp
+        </button>
+        <p class="rq-err" id="rqErr" hidden></p>
+      </form>
+
+      <div class="rq-preview" aria-live="polite">
+        <div class="rq-phone-top"><span class="rq-ava"><em>V</em></span><div><b>Velom Car</b><small>pratinjau pesan WhatsApp Anda</small></div></div>
+        <div class="rq-chat"><div class="rq-bubble" id="rqBubble"></div></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ================= KONTAK ================= -->
   <section id="contact" class="contact">
     <p class="eyebrow"><i class="dot"></i>Siap jalan?</p>
@@ -170,7 +222,7 @@
   <footer class="footer">
     <div class="footer-big" aria-hidden="true">VELOM</div>
     <div class="footer-row">
-      <span>© <span id="year"></span> Velom Car</span>
+      <span>© <span id="year"></span> Velom Car · <a id="footIg" target="_blank" rel="noopener" hidden></a></span>
       <span>Harga &amp; ketersediaan dapat berubah sewaktu-waktu.</span>
     </div>
   </footer>
@@ -186,8 +238,8 @@
 </div>
 
 <!-- detail unit (diisi oleh JavaScript) -->
-<div id="detail" class="detail" aria-hidden="true"></div>
-<div id="lightbox" class="lightbox" aria-hidden="true">
+<div id="detail" class="detail" aria-hidden="true" data-lenis-prevent></div>
+<div id="lightbox" class="lightbox" aria-hidden="true" data-lenis-prevent>
   <button class="lb-x" aria-label="Tutup">×</button>
   <button class="lb-nav lb-prev" aria-label="Sebelumnya">‹</button>
   <img alt="">
@@ -197,10 +249,10 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
-<script src="assets/js/config.js?v=9"></script>
-<script src="assets/js/parser.js?v=9"></script>
-<script src="assets/js/sfx.js?v=9"></script>
-<script src="assets/js/hero3d.js?v=9"></script>
-<script src="assets/js/app.js?v=9"></script>
+<script src="assets/js/config.js?v=11"></script>
+<script src="assets/js/parser.js?v=11"></script>
+<script src="assets/js/sfx.js?v=11"></script>
+<script src="assets/js/hero3d.js?v=11"></script>
+<script src="assets/js/app.js?v=11"></script>
 </body>
 </html>

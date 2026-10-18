@@ -61,8 +61,12 @@
     $$("[data-wa=general]").forEach(function (a) { a.href = general; });
     $("#waDisplay").textContent = CFG.whatsappDisplay || ("+" + CFG.whatsapp);
     if (CFG.instagram) {
-      var ig = $("#igLink");
-      ig.hidden = false; ig.href = "https://instagram.com/" + CFG.instagram; ig.textContent = "@" + CFG.instagram + " ↗";
+      var igUrl = "https://www.instagram.com/" + CFG.instagram + "/";
+      [["#igLink", "Instagram @" + CFG.instagram + " ↗"], ["#footIg", "@" + CFG.instagram], ["#navIg", null]].forEach(function (x) {
+        var el = $(x[0]); if (!el) return;
+        el.hidden = false; el.href = igUrl;
+        if (x[1]) el.textContent = x[1];
+      });
     }
     $("#year").textContent = new Date().getFullYear();
   }
@@ -140,9 +144,16 @@
 
   /* ================= SCROLL ENGINE ================= */
   function setupScroll() {
-    if (window.Lenis && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      lenis = new Lenis({ lerp: 0.085, smoothWheel: true, syncTouch: false });
-      lenis.stop();
+    // Smooth scroll hanya untuk mouse/touchpad di PC. HP & browser Instagram pakai scroll bawaan (paling stabil).
+    if (window.Lenis && fine && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      try {
+        lenis = new Lenis({ lerp: 0.1, smoothWheel: true, syncTouch: false });
+        lenis.stop(); // dibuka saat masuk dari layar START
+        var raf = function (t) { lenis.raf(t); requestAnimationFrame(raf); };
+        requestAnimationFrame(raf);
+      } catch (e) { console.warn("[VELOM] smooth scroll off:", e); lenis = null; }
+    }
+    if (lenis) {
       $$('a[href^="#"]').forEach(function (a) {
         a.addEventListener("click", function (e) {
           var h = a.getAttribute("href");
@@ -233,8 +244,6 @@
         paintIdx = pi;
         var c = cars[pi];
         Hero.setPaint(c.info.paint);
-        swatch.style.background = c.info.paint;
-        paintName.textContent = (c.info.color ? c.info.color.split(/\s+on\s+/i)[0] : "Custom") + " · " + c.info.title.split(" ").slice(0, 3).join(" ");
       }
     }
   }
@@ -526,7 +535,6 @@
     if (!detailOpen) { SFX.whoosh(); }
     detailOpen = true;
     document.body.classList.add("is-locked");
-    if (lenis) lenis.stop();
     Hero.setPaint(i.paint);
 
     // event
@@ -875,6 +883,67 @@
     });
   }
 
+  /* ================= REQUEST: jual mobil / cari unit ================= */
+  var RQ = {
+    jual: {
+      head: "Halo Velom 👋, saya mau *JUAL MOBIL*.",
+      fields: [["nama", "Nama"], ["kota", "Kota"], ["unit", "Unit"], ["tahun", "Tahun"], ["odo", "Odometer"], ["warna", "Warna"], ["harga", "Harga yang diharapkan"], ["catatan", "Kondisi / catatan"]],
+      foot: "Foto unit akan saya kirim di chat ini. Terima kasih 🙏"
+    },
+    cari: {
+      head: "Halo Velom 👋, saya sedang *MENCARI UNIT*.",
+      fields: [["nama", "Nama"], ["kota", "Kota"], ["unit", "Unit dicari"], ["tahun", "Tahun"], ["budget", "Budget"], ["warna", "Warna favorit"], ["catatan", "Catatan"]],
+      foot: "Mohon dibantu carikan unit di bawah harga pasaran 🙏"
+    }
+  };
+
+  function setupRequest() {
+    var form = $("#rqForm"); if (!form) return;
+    var mode = "jual", bubble = $("#rqBubble"), err = $("#rqErr");
+
+    function set() { return $('.rq-set[data-mode="' + mode + '"]', form); }
+    function message() {
+      var r = RQ[mode], s = set(), lines = [r.head, ""], filled = 0;
+      r.fields.forEach(function (f) {
+        var el = $('[name="' + f[0] + '"]', s), v = el ? el.value.trim() : "";
+        if (v) { lines.push("• " + f[1] + ": " + v); filled++; }
+      });
+      if (!filled) lines.push("…");
+      lines.push("", r.foot);
+      return lines.join("\n");
+    }
+    function render() {
+      // tampilkan *tebal* seperti di WhatsApp
+      bubble.innerHTML = escHtml(message()).replace(/\*([^*\n]+)\*/g, "<b>$1</b>").replace(/\n/g, "<br>") +
+        '<span class="rq-time">' + new Date().toTimeString().slice(0, 5) + " ✓✓</span>";
+    }
+
+    $$(".rq-tab", form).forEach(function (t) {
+      t.addEventListener("click", function () {
+        mode = t.dataset.mode; SFX.click();
+        $$(".rq-tab", form).forEach(function (x) { x.classList.toggle("is-on", x === t); });
+        $$(".rq-set", form).forEach(function (fs) {
+          var on = fs.dataset.mode === mode;
+          fs.hidden = !on; fs.disabled = !on;
+        });
+        err.hidden = true; render();
+      });
+    });
+    form.addEventListener("input", function () { err.hidden = true; render(); SFX.tick(); });
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var unit = $('[name="unit"]', set());
+      if (!unit.value.trim()) {
+        err.textContent = mode === "jual" ? "Isi dulu merk & tipe mobil Anda ya." : "Isi dulu unit yang Anda cari ya.";
+        err.hidden = false; unit.focus(); return;
+      }
+      SFX.click();
+      var url = wa(message()), w = window.open(url, "_blank");
+      if (!w) location.href = url; // browser Instagram kadang memblokir tab baru
+    });
+    render();
+  }
+
   /* ================= START ================= */
   setupLinks();
   setupGate();
@@ -883,6 +952,7 @@
   setupLightbox();
   setupCursor();
   setupConcierge();
+  setupRequest();
   window.addEventListener("popstate", route);
 
   loadData(function (data) {

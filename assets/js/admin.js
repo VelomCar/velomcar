@@ -185,7 +185,7 @@
       '<div class="parsed"></div></div>' +
       '<div><div class="fields">' + FIELDS.map(function (f) {
         if (f[0] === "status") {
-          return '<label>Status<select data-f="status"><option value="ready">Ready</option><option value="booked">Booked</option><option value="sold">Sold</option><option value="hidden">Sembunyikan</option></select></label>';
+          return '<label>Status<select data-f="status"><option value="ready">Ready</option><option value="booked">Booked</option><option value="hidden">Sembunyikan</option></select></label>';
         }
         return '<label class="' + (f[2] || "") + '">' + f[1] + '<input data-f="' + f[0] + '"></label>';
       }).join("") +
@@ -299,13 +299,33 @@
         "<div><h4>" + esc(i.title) + "</h4><p>" + esc([i.year, i.priceText, c.date].filter(Boolean).join(" · ")) +
         (isNew ? ' <span class="new">• belum dipublish</span>' : "") + "</p></div>" +
         '<div class="st-tools"><select data-a="status">' +
-        ["ready", "booked", "sold", "hidden"].map(function (s) {
-          return '<option value="' + s + '"' + ((c.status || "ready") === s ? " selected" : "") + ">" + { ready: "Ready", booked: "Booked", sold: "Sold", hidden: "Sembunyi" }[s] + "</option>";
+        ["ready", "booked", "hidden"].map(function (s) {
+          return '<option value="' + s + '"' + ((c.status || "ready") === s ? " selected" : "") + ">" + { ready: "Ready", booked: "Booked", hidden: "Sembunyi" }[s] + "</option>";
         }).join("") + "</select>" +
         '<button class="icon" data-a="up" title="Naikkan">↑</button><button class="icon" data-a="down" title="Turunkan">↓</button>' +
         '<button class="icon" data-a="edit" title="Edit">✎</button><button class="icon" data-a="poster" title="Poster IG Story">📸</button>' +
-        '<button class="icon" data-a="del" title="Hapus">🗑</button></div></div>';
+        '<button class="btn sold sm" data-a="sold" title="Terjual: hapus unit + semua fotonya">✓ SOLD</button></div></div>';
     }).join("");
+  }
+
+  // Hapus unit dari website + tandai fotonya untuk dihapus dari hosting saat Publish
+  function removeCar(c) {
+    var k = cars.indexOf(c);
+    if (k < 0) return;
+    cars.splice(k, 1);
+    var wasNew = c.photos.every(function (p) { return pending[p]; });
+    c.photos.forEach(function (p) { delete pending[p]; });
+    if (!wasNew && removed.indexOf(c.id) < 0) removed.push(c.id);
+  }
+
+  function removeAll() {
+    if (!cars.length) return toast("Inventori sudah kosong", true);
+    if (!confirm("Hapus SEMUA " + cars.length + " unit beserta semua fotonya dari website?")) return;
+    var t = prompt("Ketik HAPUS untuk konfirmasi:");
+    if (!t || t.trim().toUpperCase() !== "HAPUS") return toast("Dibatalkan");
+    cars.slice().forEach(removeCar);
+    markDirty();
+    toast("Semua unit dihapus. Tekan 🚀 Publish agar website ikut kosong.", false, 6000);
   }
 
   function bindStock() {
@@ -319,13 +339,12 @@
       var k = +b.closest(".st").dataset.k, a = b.dataset.a, c = cars[k];
       if (a === "up" && k > 0) { cars.splice(k - 1, 0, cars.splice(k, 1)[0]); markDirty(); }
       if (a === "down" && k < cars.length - 1) { cars.splice(k + 1, 0, cars.splice(k, 1)[0]); markDirty(); }
-      if (a === "del") {
-        if (!confirm("Hapus unit ini dari website?\n\n" + P.parse(c.spek, c.edits).title)) return;
-        cars.splice(k, 1);
-        var wasNew = c.photos.every(function (p) { return pending[p]; });
-        c.photos.forEach(function (p) { delete pending[p]; });
-        if (!wasNew) removed.push(c.id);
+      if (a === "sold") {
+        var nm = P.parse(c.spek, c.edits).title;
+        if (!confirm("✓ SOLD — " + nm + "\n\nUnit ini akan dihapus dari website beserta " + c.photos.length + " fotonya.\nLanjutkan?")) return;
+        removeCar(c);
         markDirty();
+        toast("🎉 " + nm + " terjual! Tekan 🚀 Publish untuk menghapusnya dari website.", false, 6000);
       }
       if (a === "edit") openModal(editor(c, "edit", function (act, work) {
         closeModal();
@@ -336,8 +355,15 @@
     });
   }
 
-  function openModal(node) { var b = $("#modalBox"); b.innerHTML = ""; b.appendChild(node); $("#modal").classList.add("on"); }
-  function closeModal() { $("#modal").classList.remove("on"); $("#modalBox").innerHTML = ""; }
+  function openModal(node) {
+    var b = $("#modalBox"); b.innerHTML = ""; b.appendChild(node);
+    $("#modal").classList.add("on"); $("#modal").scrollTop = 0;
+    document.body.classList.add("modal-open");
+  }
+  function closeModal() {
+    $("#modal").classList.remove("on"); $("#modalBox").innerHTML = "";
+    document.body.classList.remove("modal-open");
+  }
 
   /* ---------------- PUBLISH ---------------- */
   function buildJs() {
@@ -645,6 +671,7 @@
     $("#pubGh").onclick = publishGitHub;
     $("#pubFolder").onclick = publishFolder;
     $("#pubZip").onclick = publishZip;
+    $("#delAll").onclick = removeAll;
     bindStock();
     loadData();
   }

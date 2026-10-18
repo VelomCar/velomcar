@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/admin.css?v=9">
+<link rel="stylesheet" href="assets/css/admin.css?v=11">
 </head>
 <body>
 
@@ -51,7 +51,9 @@
   <section class="panel" id="tab-stock">
     <div class="panel-head">
       <h2>Inventori Website</h2>
-      <p>Atur urutan, status (Ready / Booked / Sold), edit harga, hapus unit, atau buat poster Instagram Story.</p>
+      <p>Atur urutan, status (Ready / Booked / Sembunyi), edit harga, atau buat poster Instagram Story.
+        Tekan <b>✓ SOLD</b> jika unit terjual — unit &amp; semua fotonya dihapus dari website saat Anda tekan 🚀 Publish.</p>
+      <button class="btn danger sm" id="delAll" style="margin-top:12px">🗑 Hapus semua unit</button>
     </div>
     <div id="stock"></div>
   </section>
@@ -106,8 +108,8 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="assets/js/config.js?v=9"></script>
-<script src="assets/js/parser.js?v=9"></script>
-<script src="assets/js/admin.js?v=9"></script>
+<script src="assets/js/config.js?v=11"></script>
+<script src="assets/js/parser.js?v=11"></script>
+<script src="assets/js/admin.js?v=11"></script>
 </body>
 </html>

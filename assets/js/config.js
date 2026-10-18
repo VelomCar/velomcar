@@ -12,7 +12,7 @@ window.VELOM_CONFIG = {
   whatsappDisplay: "+62 877-7187-0730",
 
   // Username Instagram tanpa @ (kosongkan jika belum mau ditampilkan)
-  instagram: "",
+  instagram: "velom.car",
 
   // Alamat website: https://ophirsalomo-bit.github.io/velomcar/
   // Dipakai tombol 🚀 Publish di admin (token tetap diisi manual di admin, TIDAK di sini)
